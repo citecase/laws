@@ -76,7 +76,6 @@
         <div class="mb-8 md:mb-12 select-none">
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-1">CiteCase</h1>
             <p class="text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] text-slate-300">BareAct Search</p>
-            <p id="act-counter" class="text-[9px] font-bold text-slate-400 mt-4 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full inline-block">Index: 5 Acts</p>
         </div>
 
         <!-- Central Typing Space -->
@@ -104,18 +103,25 @@
     <!-- About View -->
     <div id="about-view" class="w-full max-w-lg hidden-view flex-col items-center text-center py-10 view-transition" style="display: none;">
         <h2 class="text-2xl font-bold mb-6">About CiteCase</h2>
-        <p class="text-slate-600 leading-relaxed mb-8 text-sm md:text-base">
-            This web-app helps you to quickly access pdf of BareActs from IndiaCode and other official sources. 
-            We are on <span class="font-bold text-black">Trial mode</span>. 
-            Users may share the name of the Act they want to include here via the feedback form below.
-        </p>
+        <div class="text-slate-600 leading-relaxed mb-8 text-sm md:text-base">
+            <p class="mb-4">
+                This web-app helps you to quickly access PDFs of BareActs from IndiaCode and other official sources.
+            </p>
+            <p class="mb-4">
+                As of now, <span id="act-count-text" class="font-bold text-black">0 Acts</span> are available in our database.
+            </p>
+            <p>
+                We are on <span class="font-bold text-black">Trial mode</span>. 
+                Users may share the name of the Act they want to include here via the feedback form below.
+            </p>
+        </div>
         <div class="flex flex-col items-center gap-4">
             <button onclick="toggleView('search')" class="text-[10px] font-bold uppercase tracking-widest text-black border-b border-black pb-1">Back to Search</button>
             <button onclick="lockApp()" class="text-[10px] font-bold uppercase tracking-widest text-slate-300 hover:text-red-500 transition-colors">Lock App</button>
         </div>
     </div>
 
-    <!-- Reduced Size Feedback Container (Hidden by default) -->
+    <!-- Reduced Size Feedback Container -->
     <div id="tally-container" class="w-full max-w-sm mt-12 mb-8 opacity-60 hover:opacity-100 transition-all duration-500" style="display: none;">
         <iframe data-tally-src="https://tally.so/embed/EklbV4?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="180" frameborder="0" marginheight="0" marginwidth="0" title="Feedback"></iframe>
         <script>
@@ -142,31 +148,67 @@
             },
             {
                 name: "Bharatiya Nagarik Suraksha Sanhita",
-                abbr: ["BNSS", "CrPC"],
+                abbr: ["BNSS"],
                 year: "2023",
                 url: "https://www.indiacode.nic.in/bitstream/123456789/20099/1/eng.pdf"
             },
             {
                 name: "Bharatiya Nyaya Sanhita",
-                abbr: ["BNS", "IPC"],
+                abbr: ["BNS"],
                 year: "2023",
                 url: "https://www.indiacode.nic.in/bitstream/123456789/20062/1/a202345.pdf"
             },
             {
                 name: "Bharatiya Sakshya Adhiniyam",
-                abbr: ["BSA", "Evidence"],
+                abbr: ["BSA"],
                 year: "2023",
                 url: "https://www.indiacode.nic.in/bitstream/123456789/20063/1/aa202347.pdf"
+            },
+            {
+                name: "Code of Criminal Procedure",
+                abbr: ["CrPC"],
+                year: "1973",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/15272/1/the_code_of_criminal_procedure,_1973.pdf"
+            },
+            {
+                name: "Indian Penal Code",
+                abbr: ["IPC"],
+                year: "1860",
+                url: "https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf"
+            },
+            {
+                name: "Indian Evidence Act",
+                abbr: ["IEA"],
+                year: "1872",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/15351/1/iea_1872.pdf"
             },
             {
                 name: "Code of Civil Procedure",
                 abbr: ["CPC"],
                 year: "1908",
                 url: "https://www.indiacode.nic.in/bitstream/123456789/13813/1/the_code_of_civil_procedure%2C_1908.pdf"
+            },
+            {
+                name: "Insolvency and Bankruptcy Code",
+                abbr: ["IBC"],
+                year: "2016",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/2154/5/A2016-31.pdf"
+            },
+            {
+                name: "Arbitration and Conciliation Act",
+                abbr: ["Arbitration"],
+                year: "1996",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/1978/3/a1996-26.pdf"
+            },
+            {
+                name: "Central Goods and Services Tax Act",
+                abbr: ["GST", "CGST"],
+                year: "2017",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/15689/5/a2017-12.pdf"
             }
         ];
 
-        document.getElementById('act-counter').textContent = `Index: ${laws.length} Acts`;
+        document.getElementById('act-count-text').textContent = `${laws.length} Acts`;
 
         const lockView = document.getElementById('lock-view');
         const lockInput = document.getElementById('lock-input');
