@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>CiteCase | BareAct Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #search-input, #lock-input {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            -webkit-appearance: none;
+        }
+
+        #search-input::placeholder, #lock-input::placeholder {
+            color: #f1f5f9;
+        }
+
+        .law-item.active {
+            color: #000;
+            font-weight: 700;
+            transform: translateX(4px);
+        }
+
+        .law-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-transition {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .hidden-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center px-6 overflow-x-hidden">
+
+    <!-- Lock View (Default) -->
+    <div id="lock-view" class="w-full max-w-2xl flex flex-col items-center text-center py-10 view-transition">
+        <div class="mb-12 select-none">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-1">CiteCase</h1>
+            <p class="text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] text-slate-300">Access Restricted</p>
+        </div>
+        
+        <div class="w-full relative flex flex-col items-center">
+            <input 
+                type="text" 
+                id="lock-input" 
+                class="w-full py-4 text-center text-2xl md:text-4xl font-medium text-black"
+                placeholder="Enter Access Code"
+                autocomplete="off"
+                maxlength="8"
+            >
+        </div>
+    </div>
+
+    <!-- Main Search View -->
+    <div id="search-view" class="w-full max-w-2xl hidden-view flex flex-col items-center text-center py-10 view-transition" style="display: none;">
+        
+        <!-- Header Section -->
+        <div class="mb-8 md:mb-12 select-none">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-1">CiteCase</h1>
+            <p class="text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] text-slate-300">BareAct Search</p>
+            <p id="act-counter" class="text-[9px] font-bold text-slate-400 mt-4 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full inline-block">Index: 5 Acts</p>
+        </div>
+
+        <!-- Central Typing Space -->
+        <div class="w-full relative flex flex-col items-center">
+            <input 
+                type="text" 
+                id="search-input" 
+                class="w-full py-4 text-center text-2xl md:text-5xl font-medium text-black"
+                placeholder="Start typing..."
+                autocomplete="off"
+                spellcheck="false"
+            >
+            
+            <!-- Prediction Results -->
+            <div id="results-container" class="mt-6 w-full hidden">
+                <ul id="results-list" class="flex flex-col items-center space-y-4 md:space-y-6">
+                    <!-- Results injected here -->
+                </ul>
+            </div>
+        </div>
+
+        <button onclick="toggleView('about')" class="mt-12 text-[10px] font-bold uppercase tracking-widest text-slate-300 hover:text-black transition-colors">About</button>
+    </div>
+
+    <!-- About View -->
+    <div id="about-view" class="w-full max-w-lg hidden-view flex-col items-center text-center py-10 view-transition" style="display: none;">
+        <h2 class="text-2xl font-bold mb-6">About CiteCase</h2>
+        <p class="text-slate-600 leading-relaxed mb-8 text-sm md:text-base">
+            This web-app helps you to quickly access pdf of BareActs from IndiaCode and other official sources. 
+            We are on <span class="font-bold text-black">Trial mode</span>. 
+            Users may share the name of the Act they want to include here via the feedback form below.
+        </p>
+        <div class="flex flex-col items-center gap-4">
+            <button onclick="toggleView('search')" class="text-[10px] font-bold uppercase tracking-widest text-black border-b border-black pb-1">Back to Search</button>
+            <button onclick="lockApp()" class="text-[10px] font-bold uppercase tracking-widest text-slate-300 hover:text-red-500 transition-colors">Lock App</button>
+        </div>
+    </div>
+
+    <!-- Reduced Size Feedback Container (Hidden by default) -->
+    <div id="tally-container" class="w-full max-w-sm mt-12 mb-8 opacity-60 hover:opacity-100 transition-all duration-500" style="display: none;">
+        <iframe data-tally-src="https://tally.so/embed/EklbV4?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="180" frameborder="0" marginheight="0" marginwidth="0" title="Feedback"></iframe>
+        <script>
+            var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};
+            if("undefined"!=typeof Tally)v();
+            else if(d.querySelector('script[src="'+w+'"]')==null){
+                var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);
+            }
+        </script>
+    </div>
+
+    <!-- Mobile-optimized Toast -->
+    <div id="toast" class="fixed bottom-6 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 opacity-0 transition-opacity pointer-events-none">
+        Loading PDF...
+    </div>
+
+    <script>
+        const laws = [
+            {
+                name: "Constitution of India",
+                abbr: ["COI", "Constitution"],
+                year: "2024",
+                url: "https://cdnbbsr.s3waas.gov.in/s380537a945c7aaa788ccfcdf1b99b5d8f/uploads/2024/07/20240716890312078.pdf"
+            },
+            {
+                name: "Bharatiya Nagarik Suraksha Sanhita",
+                abbr: ["BNSS", "CrPC"],
+                year: "2023",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/20099/1/eng.pdf"
+            },
+            {
+                name: "Bharatiya Nyaya Sanhita",
+                abbr: ["BNS", "IPC"],
+                year: "2023",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/20062/1/a202345.pdf"
+            },
+            {
+                name: "Bharatiya Sakshya Adhiniyam",
+                abbr: ["BSA", "Evidence"],
+                year: "2023",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/20063/1/aa202347.pdf"
+            },
+            {
+                name: "Code of Civil Procedure",
+                abbr: ["CPC"],
+                year: "1908",
+                url: "https://www.indiacode.nic.in/bitstream/123456789/13813/1/the_code_of_civil_procedure%2C_1908.pdf"
+            }
+        ];
+
+        document.getElementById('act-counter').textContent = `Index: ${laws.length} Acts`;
+
+        const lockView = document.getElementById('lock-view');
+        const lockInput = document.getElementById('lock-input');
+        const searchInput = document.getElementById('search-input');
+        const searchView = document.getElementById('search-view');
+        const aboutView = document.getElementById('about-view');
+        const tallyContainer = document.getElementById('tally-container');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsList = document.getElementById('results-list');
+        const toast = document.getElementById('toast');
+
+        let selectedIndex = 0;
+        let filteredLaws = [];
+
+        function getTodayCode() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${day}${month}${year}`; // DDMMYYYY
+        }
+
+        function checkLock(e) {
+            const inputCode = lockInput.value.trim();
+            const correctCode = getTodayCode();
+
+            if (inputCode === correctCode) {
+                unlockApp();
+            } else if (inputCode.length === 8) {
+                lockInput.classList.add('text-red-500');
+                setTimeout(() => lockInput.classList.remove('text-red-500'), 500);
+            }
+        }
+
+        function unlockApp() {
+            lockView.classList.add('hidden-view');
+            setTimeout(() => {
+                lockView.style.display = 'none';
+                searchView.style.display = 'flex';
+                tallyContainer.style.display = 'block';
+                setTimeout(() => {
+                    searchView.classList.remove('hidden-view');
+                    searchInput.focus();
+                }, 50);
+            }, 400);
+        }
+
+        function lockApp() {
+            aboutView.classList.add('hidden-view');
+            searchView.classList.add('hidden-view');
+            tallyContainer.style.display = 'none';
+            lockInput.value = '';
+            setTimeout(() => {
+                aboutView.style.display = 'none';
+                searchView.style.display = 'none';
+                lockView.style.display = 'flex';
+                setTimeout(() => {
+                    lockView.classList.remove('hidden-view');
+                    lockInput.focus();
+                }, 50);
+            }, 400);
+        }
+
+        function toggleView(view) {
+            if (view === 'about') {
+                searchView.classList.add('hidden-view');
+                setTimeout(() => {
+                    searchView.style.display = 'none';
+                    aboutView.style.display = 'flex';
+                    setTimeout(() => aboutView.classList.remove('hidden-view'), 50);
+                }, 300);
+            } else {
+                aboutView.classList.add('hidden-view');
+                setTimeout(() => {
+                    aboutView.style.display = 'none';
+                    searchView.style.display = 'flex';
+                    setTimeout(() => {
+                        searchView.classList.remove('hidden-view');
+                        searchInput.focus();
+                    }, 50);
+                }, 300);
+            }
+        }
+
+        function showToast() {
+            toast.classList.add('opacity-100');
+            setTimeout(() => toast.classList.remove('opacity-100'), 2500);
+        }
+
+        function openPDF(url) {
+            window.open(url, '_blank');
+            showToast();
+            searchInput.value = '';
+            renderResults();
+        }
+
+        function renderResults() {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            if (!query) {
+                resultsContainer.classList.add('hidden');
+                filteredLaws = [];
+                return;
+            }
+
+            filteredLaws = laws.filter(law => {
+                return law.name.toLowerCase().includes(query) || 
+                       law.abbr.some(a => a.toLowerCase().includes(query));
+            });
+
+            if (filteredLaws.length > 0) {
+                resultsContainer.classList.remove('hidden');
+                resultsList.innerHTML = filteredLaws.map((law, index) => `
+                    <li class="law-item group cursor-pointer text-slate-200 ${index === selectedIndex ? 'active' : ''}" 
+                        onclick="openPDF('${law.url}')"
+                        onmouseenter="selectedIndex = ${index}; updateActiveState();">
+                        <div class="flex flex-col items-center">
+                            <span class="text-xl md:text-3xl">${law.name}</span>
+                            <span class="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mt-1">${law.year}</span>
+                        </div>
+                    </li>
+                `).join('');
+            } else {
+                resultsList.innerHTML = `<li class="text-slate-200 text-sm font-light italic">No results match</li>`;
+                resultsContainer.classList.remove('hidden');
+            }
+        }
+
+        function updateActiveState() {
+            const items = resultsList.querySelectorAll('.law-item');
+            items.forEach((item, index) => {
+                if (index === selectedIndex) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+        }
+
+        lockInput.addEventListener('input', checkLock);
+        searchInput.addEventListener('input', () => {
+            selectedIndex = 0;
+            renderResults();
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (filteredLaws.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % filteredLaws.length;
+                updateActiveState();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + filteredLaws.length) % filteredLaws.length;
+                updateActiveState();
+            } else if (e.key === 'Enter') {
+                if (filteredLaws[selectedIndex]) openPDF(filteredLaws[selectedIndex].url);
+            }
+        });
+
+        window.addEventListener('load', () => lockInput.focus());
+    </script>
+</body>
+</html>
